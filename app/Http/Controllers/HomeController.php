@@ -30,7 +30,8 @@ class HomeController extends Controller
      */
     public function index()
     {
-         $product= Product::all();
+        $product = Product::where('productstatus', 1)->paginate(24);
+
          $companies=Company::all();
          $categories=category::all();
 
@@ -47,10 +48,14 @@ class HomeController extends Controller
                         ->when($request->keyword,function($product) use($request){
                             $product->where('description','like','%' .$request->keyword . '%')
                                 ->orWhere('name','like','%' .$request->keyword . '%');
-                        })
-                        ->get();
+                        })->paginate(24);
+                        $product->appends($request->all());
+
         return view('home', compact(['product','categories', 'companies']));
     }
-
+ public function adminPage()
+ {
+    return view('admin.dashbord');
+ }
 
 }

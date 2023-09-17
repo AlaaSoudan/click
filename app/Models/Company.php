@@ -13,8 +13,8 @@ class Company extends Model
 
    ];
 
-   public function products()
+ /*   public function products()
    {
-       return $this->belongsToMany(product::class);
-   }
+       return $this->belongsToMany(Product::class);
+   } */
 }

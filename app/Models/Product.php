@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
-{
+{ const COLLECTION_PER_PAGE = 9;
     protected $table ="products";
     protected $fillable = [
         'name',
@@ -14,7 +14,9 @@ class Product extends Model
         'parentId',
         'category_id',
         'price',
-        'image'
+        'image',
+        'company_id',
+        'productstatus'
 
 
 
@@ -23,7 +25,7 @@ class Product extends Model
     public function orders()
     {
 
-        return $this->belongsToMany(Order::class,  'orders_product', 'order_id', 'product_id')->withPivot(['price', 'quantity','note','user_id']);
+        return $this->belongsToMany(Order::class,  'orders_product', 'order_id', 'product_id','created_at')->withPivot(['price', 'quantity','user_id', 'created_at']);
     }
 
 
@@ -33,7 +35,7 @@ class Product extends Model
     }
     public function companies()
     {
-        return $this->belongsToMany(company::class,'company_id');
+        return $this->belongsTo(Company::class, 'company_id');
     }
 
     public function childrenProducts()
@@ -49,6 +51,7 @@ class Product extends Model
     {
         return $this->belongsTo(Category::class, 'category_id');
     }
+
 
 
     public function scopeParent($query){

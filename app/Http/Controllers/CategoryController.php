@@ -71,7 +71,7 @@ class CategoryController extends Controller
 
      /*    Event::dispatch(new DataCreated()); */
 
-        return redirect('/category');
+        return redirect()->route('category');
     }
 
     /**
@@ -123,7 +123,7 @@ class CategoryController extends Controller
 
         $category->update();
 
-       return redirect('/category');
+        return redirect()->route('category');
     }
 
     /**
@@ -137,7 +137,7 @@ class CategoryController extends Controller
 
         $category = category::findOrFail($id);
         $category->delete();
-        return redirect('/category');
+        return redirect()->route('category');
     }
 
 

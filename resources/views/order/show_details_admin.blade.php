@@ -1,6 +1,6 @@
 <!--begin::Form-->
-@extends('layouts.app')
-@section('content')
+@extends('admin.adminpage')
+@section('content_admin')
 <section class="container">
 <div class=" container my-5 row p-8 ">
     <table   id="table"

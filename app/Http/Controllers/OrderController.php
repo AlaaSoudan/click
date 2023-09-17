@@ -22,13 +22,17 @@ class OrderController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
 
 
     public function index()
     {
-       $orders= Order::all();
+        $orders = Order::orderBy('created_at','DESC')->where('status', '!=', Order::Order_Delivered)->paginate(24);
        return view('order.all_order',compact($orders,'orders'));
+
     }
 
     /**
@@ -106,7 +110,7 @@ class OrderController extends Controller
 
 
  //لا انسى clear
- return redirect('/home');
+ return redirect('/');
     }
 
 
@@ -147,9 +151,11 @@ class OrderController extends Controller
         $order->status="0" ;
 
       $items =Cart::session($userId)->getcontent()->toArray();
+      $note= $request->input('note');
+      $order->note=$note;
 
          $order->save();
-        $note= $request->input('note');
+
         foreach($items as$id => $product)
 
         {
@@ -158,12 +164,12 @@ class OrderController extends Controller
             $price= Arr::get($product, 'price');
             $quantity=Arr::get($product, 'quantity');
 
-            $order->products()->attach($id,  [ 'price'=>$price,'user_id'=>$userId,'quantity' => $quantity,'note'=>'sdfgfd']);
+            $order->products()->attach($id,  [ 'price'=>$price,'user_id'=>$userId,'quantity' => $quantity,]);
         }
 
  Cart::session($userId)->clear();
 
-        return redirect('/home');
+        return redirect('/');
     }
 
     /**
@@ -176,24 +182,49 @@ class OrderController extends Controller
     {
 
     }
+      public function Order_search(Request $request){
+
+
+
+        $orders = Order::search($request->keyword)->orderBy('created_at','DESC')->paginate(24);
+
+
+    /*  $orders= Order::orderBy('created_at','DESC')->with('user')
+
+                        ->when($request->keyword,function($order) use($request){
+                            $order->where($order,'like','%' .$request->keyword . '%');
+                        })->paginate(24);
+                        $order->appends($request->all());
+ */
+
+
+                        return view('order.all_order', compact(['orders']));
+    }
     public function changeStatus(Request $request)
     {
 
         $order = Order::findOrFail($request->id);
         $order->status = $request->status;
-        /* if ($request->status == Order::Order_Delivered) {
-            $order->deliveryDate = now();
-        } */
-
+        if ($request->status == Order::Order_Delivered) {
+            $order->updated_at = now();
+        }
+        if ($request->status == Order::Order_Confirmed) {
+            foreach ($order->products  as $product) {
+        /*         $product->pivot->status = Order::Order_Confirmed;
+                $product->pivot->save(); */
+                $order->status = $request->status;
+            }
+        }
+       /*  $order->totalPrice = $order->products()->having('pivot_status', Order::Order_Confirmed)->get()->sum('pivot.price'); */
         $order->save();
-        return redirect('/orders');
+        return redirect()->route('orders');
     }
-    public function deliveredOrders()
+     public function deliveredOrders()
     {
-        $orders = Order::orderBy('deliveryDate','DESC')->where('status', Order::Order_Delivered)->get();
-        return view('pages.order.delivered_orders', compact('orders'));
+        $orders = Order::orderBy('updated_at','DESC')->where('status', Order::Order_Delivered)->get();
+        return view('order.delivered', compact('orders'));
     }
-    public function changeProductStatus(Request $request)
+  /*  public function changeProductStatus(Request $request)
     {
 
         $order = Order::findOrFail($request->orderId);
@@ -244,7 +275,7 @@ class OrderController extends Controller
         });
         return view('pages.order.productsToPrepare', compact('products'));
     }
-
+ */
     /**
      * Show the form for editing the specified resource.
      *
@@ -254,8 +285,20 @@ class OrderController extends Controller
     public function OrderDetails($id)
     {
         $order = Order::with('products')->findOrFail($id)->products;
+        $user= User::first();
+        Auth::SetUser($user);
+        $user =Auth::user();
 
+
+         if ($user->role =='admin'){
+            return view('order.show_details_admin',compact('order'));
+         }
+         else
+
+    {
         return view('order.show_details',compact('order'));
+    }
+
     }
 
     /**

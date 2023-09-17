@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\category;
+use App\Models\Company;
+use Illuminate\Support\Facades\Storage;
 
 
 
@@ -15,12 +17,20 @@ class ProductsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
-        $products= Product::all();
+    public function index(Request $request)
+    {     $companies=Company::all();
+        $categories=category::all();
+        $products = Product::with(['companies', 'category'])->where('parentId',null)->when($request->keyword, function ($q) use ($request) {
 
-       return view('product.show',compact('products',$products));
+            return $q->where('description','like','%' .$request->keyword . '%')
+            ->orWhere('name','like','%' .$request->keyword . '%');
+        })->paginate(24);
+        $products->appends($request->all());
+
+       return view('product.show',compact('products','companies','categories'));
     }
+
+
 
     /**
      * Show the form for creating a new resource.
@@ -31,8 +41,9 @@ class ProductsController extends Controller
     {
 
         $categories = category::get();
+        $companies = Company::get();
         $parentProducts = Product::with('childrenProducts')->where('parentId', null)->get();
-        return view('product.add',compact('parentProducts', 'categories'));
+        return view('product.add',compact('parentProducts', 'categories','companies'));
     }
 
     /**
@@ -69,7 +80,9 @@ class ProductsController extends Controller
             $product->name = $parent->name;
             $product->price = $request->price == null ?$parent->price : $request->price;
             $product->category_id = $parent->category_id;
+            $product->company_id=$request->company_id;
             $product->parentId = $request->parentId;
+            $product->Productstatus='1';
 
             if ($request->has('image') ) {
                 $imageDestination = 'public/images/product';
@@ -82,6 +95,7 @@ class ProductsController extends Controller
                else{
                    $product->image = Product::findOrFail($request->parentId)->image;
                }
+
            $product->save();
 
         }
@@ -91,7 +105,9 @@ class ProductsController extends Controller
             $product->description = $request->description;
             $product->name=$request->name;
             $product->price=$request->price;
+            $product->company_id=$request->company_id;
             $product->category_id=$request->category_id;
+            $product->Productstatus='1';
              if($request->has('image'))
              {
 
@@ -105,12 +121,13 @@ class ProductsController extends Controller
 
              }
              else {
-                $product->image = Product::findOrFail($request->parentId)->image;
+                $product->image = null;
 
              }
+
              $product->save();
         }
-         return redirect('/product');
+         return redirect()->route('product');
     }
     /**
      * Display the specified resource.
@@ -134,8 +151,9 @@ class ProductsController extends Controller
         $product = Product::findOrFail($id);
         $parentProducts = Product::with('childrenProducts')->where('parentId', null)->where('id', '!=', $id)->get();
         $categories = Category::get();
+        $companies = Company::get();
 
-        return view('product.edit', compact('product', 'parentProducts',  'categories'));
+        return view('product.edit', compact('product', 'parentProducts',  'categories','companies'));
 
     }
 
@@ -174,6 +192,7 @@ class ProductsController extends Controller
         }
 
 
+
         if ($request->has('parentId') && $product->parentId != $request->parentId) {
 
             if ($request->parentId == 'null') {
@@ -182,25 +201,35 @@ class ProductsController extends Controller
                 $product->parentId = $request->parentId;
             }
         }
-        if ($request->has('category_id') && $product->category_id != $request->category_id) {
-            $product->category_id = $request->category_id;
+        if ($request->has('company_id') && $product->company_id != $request->company_id) {
+            $product->company_id = $request->company_id;
         }
-
-        if ($request->has('image')) {
-         /*    Storage::delete([$request->image]); */
+        if ($request->has('company_id') && $product->company_id != $request->company_id) {
+            $product->company_id = $request->company_id;
+        }
+        $data = $request->all();
+        if ($request->has('image')&& $product->image != $request->image) {
+            Storage::delete($request->image);
             $imageDestination = 'public/images/product';
             $image = $request->file('image');
             $imageName = $request['name']  . time() . '_' . $image->getClientOriginalName();
             $path = $request->file('image')->storeAs($imageDestination, $imageName);
-            $product->image =  'images/product' . '/' . $imageName;
+            $image =  'images/product' . '/' . $imageName;
+            $product->image =  $image;
+
+            $data['image'] =  $image;
+
         }
-        $data = $request->all();
 
 
 
-        $product->update($data);
 
-        return redirect('/product');
+
+
+        $product->update();
+
+
+        return redirect()->route('product');
     }
 
 
@@ -217,7 +246,73 @@ class ProductsController extends Controller
             $product->childrenProducts()->delete();
         }
         $product->delete();
-        return redirect('/product');
+        return redirect()->route('product');
     }
+    public function search(Request $request){
+
+        $companies=Company::all();
+        $categories=category::all();
+
+        $product = Product::orderBy('created_at','DESC')
+                        ->with('products')
+                        ->when($request->keyword,function($product) use($request){
+                            $product->where('description','like','%' .$request->keyword . '%')
+                                ->orWhere('name','like','%' .$request->keyword . '%');
+                        })->paginate(24);
+                        $product->appends($request->all());
+
+        return  redirect()->route('product');
+    }
+    public function filters(Request $request){
+
+        $companies=Company::all();
+        $categories=category::all();
+
+       $category = $request->input('category');
+       $company = $request->input('company');
+
+
+
+
+        $products = Product::parent()->when($category ,function($products_up_category)use($category ){
+           $products_up_category->where('category_id',$category );
+       })->when($company ,function($products_up_company)use($company ){
+           $products_up_company->where('company_id',$company );
+                   })->when($request->keyword,function($products_up_keyword)use($request){
+           $products_up_keyword
+                   ->where('name','like','%' . $request->keyword . '%');
+       })->paginate(24);
+
+$products->appends($request->all());
+       return view('product.show',compact(['products','categories','companies']));
+   }
+   public function changeStatus(Request $request,$id )
+   {
+
+      $product = Product::findOrFail($request->product_id);
+
+
+        if($product->productstatus == 1)
+        {
+    		  $product->Productstatus =! true ;
+    		$product->update();
+        }
+    	else
+    	{
+    		 $product->Productstatus =!  false;
+    		$product->update();
+    	}
+
+
+    /* $product->Productstatus =! $product->status ; */
+
+
+
+       return redirect()->back();
+   }
+
+
+
+
 
 }

@@ -1,4 +1,5 @@
-
+@extends('admin.adminpage')
+@section('content_admin')
     <!--begin::Form-->
     <div class="row">
         <div class="col-lg-12">
@@ -8,13 +9,13 @@
                     <h3 class="card-title align-items-start flex-column">
                         <span class="card-label font-weight-bolder text-dark">
                             <span class="fa fa-table">&nbsp;</span>
-                            New company
+                            الشركات
                         </span>
                     </h3>
                     <!--begin::Actions-->
                     <div class="my-lg-0 my-1">
                         <a class="btn btn-sm btn-primary font-weight-bolder text-uppercase"
-                            href="{{ route('add_company') }}">New company</a>
+                            href="{{ route('add_company') }}">إضافة شركة</a>
                     </div>
                     <!--end::Actions-->
                 </div>
@@ -32,7 +33,7 @@
                     <h3 class="card-title align-items-start flex-column">
                         <span class="card-label font-weight-bolder text-dark">
 
-                            <span class="fa fa-table">&nbsp;</span> All company
+                            <span class="fa fa-table">&nbsp;</span> كل الشركات
 
 
                         </span>
@@ -49,8 +50,8 @@
                                     <thead>
                                         <tr class="text-uppercase">
                                             <th></th>
-                                            <th>Title</th>
-                                            <th>Action</th>
+                                            <th>الاسم</th>
+                                            <th></th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -102,3 +103,4 @@
         </div>
     </div>
 
+@endsection

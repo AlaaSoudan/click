@@ -2,7 +2,7 @@
 @section('content')
     <section class="section has-background-light is-clipped">
         <div class="container">
-            <div class="has-background-white p-8 p-20-desktop">
+            <div class="has-background-white has-text-right p-8 p-20-desktop">
                 <h2 class=" has-text-right title mb-8 mb-20-tablet">مشتريات</h2>
                 <div class="columns is-multiline is-vcentered">
                     <div class="column is-12 is-8-widescreen mb-8 mb-0-widescreen">

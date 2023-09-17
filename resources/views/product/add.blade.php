@@ -1,10 +1,11 @@
 
-
+@extends('admin.adminpage')
+@section('content_admin')
 <div class="card card-custom">
 
     <div class="card-header">
         <h3 class="card-title">
-            Create product
+            إضافة منتج
         </h3>
     </div>
     <!--begin::Form-->
@@ -13,7 +14,7 @@
         @csrf
        <div class="form-group row">
                     <div class="col-12">
-                        <label>Parent Product</label>
+                        <div class="has-text-right">المنتج الاساس</div>
                         <select class="form-control select2-selection__rendered " id="parent" name="parentId">
                             <option value=""></option>
                             <option value=" ">Null (Parent)</option>
@@ -30,7 +31,7 @@
                 @if (old('parentId') != null)
                     <div class="form-group row">
                         <div class="col-12">
-                            <label>name</label>
+                            <div class="has-text-right">الاسم</div>
                             <input disabled type="text" id="title" name="name" class="form-control"
                                 value="{{ request('name') }}">
                         </div>
@@ -38,7 +39,7 @@
                 @else
                     <div class="form-group row">
                         <div class="col-12">
-                            <label>name</label>
+                            <div class="has-text-right">الاسم</div>
                             <input type="text" id="title" name="name" class="form-control"
                                 value="{{ request('name') }}">
                         </div>
@@ -50,9 +51,10 @@
 
                 <div class="form-group row">
                     <div class="col-12">
-                        <label>Description</label>
+                        <div class="has-text-right">الوصف</div>
                         <div class="tinymce">
-                            <textarea id="kt-tinymce-4" name="description" class="tox-target"  aria-hidden="true">
+
+                            <textarea id="exampleFormControlTextarea1" rows="3" class="form-control" name="description" class="tox-target"  aria-hidden="true">
                                 {{old('description')}}
                             </textarea>
                         </div>
@@ -62,7 +64,7 @@
 
                 <div class="form-group row">
                     <div class="col-6">
-                        <label>Price</label>
+                        <div class="has-text-right">السعر</div>
                         <input type="number" name="price" class="form-control" value="{{ old('price') }}">
                     </div>
 {{--                     <div class="form-group row">
@@ -81,10 +83,10 @@
                         </div> --}}
 
                     <div class="col-6">
-                        <label>image</label>
+                        <div class="has-text-right">الصورة</div>
                         <div class="custom-file">
                             <input accept="image/*" type="file" class="custom-file-input"
-                                id="image" name="image">
+                                id="image" name="image" value="{{ old('image') }}">
                             <label class="custom-file-label" for="image">Choose file</label>
                         </div>
 
@@ -101,7 +103,7 @@
 
                 <div class="form-group row">
                     <div class="col-4">
-                        <label>Category</label>
+                        <div class="has-text-right">التصنفات</div>
                         @if (old('parentId') != null)
                             <select disabled name="category_id" class="form-control select2" id="category">
                                 <option value=""></option>
@@ -122,9 +124,32 @@
                             </select>
                         @endif
                     </div>
+                    <div class="form-group row">
+                        <div class="col-4">
+                            <div class="has-text-right">الشركة</div>
+                            @if (old('parentId') != null)
+                                <select disabled name="company_id" class="form-control select2" id="company">
+                                    <option value=""></option>
+
+                                    @foreach ($companies as $company)
+                                        <option @if (old('company_id') == $company->id) selected @endif value="{{ $company->id }}">
+                                            {{ $company->name }}</option>
+                                    @endforeach
+                                </select>
+                            @else
+                                <select name="company_id" class="form-control select2" id="company">
+                                    <option value=""></option>
+
+                                    @foreach ($companies as $company)
+                                        <option @if (old('company_id') == $company->id) selected @endif value="{{ $company->id }}">
+                                            {{ $company->name }}</option>
+                                    @endforeach
+                                </select>
+                            @endif
+                        </div>
 
                 <div class="form-group">
-                    <button type="submit" class="btn btn-primary"><i class="fa fa-plus"></i>Add</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa fa-plus"></i>إضافة</button>
                 </div>
             </div>
 
@@ -136,3 +161,4 @@
 </div>
 
 
+@endsection

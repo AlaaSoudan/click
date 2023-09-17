@@ -1,10 +1,11 @@
 
-
+@extends('admin.adminpage')
+@section('content_admin')
 <div class="card card-custom">
 
     <div class="card-header">
         <h3 class="card-title">
-            edit company name
+        تعديل اسم الشركة
         </h3>
     </div>
     <!--begin::Form-->
@@ -38,4 +39,4 @@
     @endif
 </div>
 
-
+@endsection

@@ -1,10 +1,11 @@
 
-
+@extends('admin.adminpage')
+@section('content_admin')
 <div class="card card-custom">
 
     <div class="card-header">
         <h3 class="card-title">
-            Create Category
+            تعديل التصنيف
         </h3>
     </div>
     <!--begin::Form-->
@@ -19,21 +20,23 @@
 
             <div class="form-group row">
                 <div class="col-12">
-                    <label>Title</label>
-                    <input type="text" name="name" class="form-control" value="{{ old('name') }}">
+                    <div class='has-text-right'>الاسم</div >
+                    <input type="text" name="name" class="form-control" value="{{$category->name }}">
+
+
                 </div>
             </div>
 
             <div class="form-group row">
                 <div class="col-12">
-                    <label>Image</label>
+                    <div class='has-text-right'>الصورة</div>
                 <input type="file" name="image" class="form-control" value="{{ old('image') }}">
 
                 </div>
             </div>
 
             <div class="form-group">
-                <button type="submit" class="btn btn-primary"><i class="fa fa-plus"></i>Add</button>
+                <button type="submit" class="btn btn-primary"><i class="fa fa-plus"></i>تعديل</button>
             </div>
         </div>
 
@@ -45,3 +48,4 @@
 </div>
 
 
+@endsection
